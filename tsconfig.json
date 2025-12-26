@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "jsx": "react-jsx",
     "paths": {
       "@/*": [
         "./*"
@@ -13,5 +14,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "services/api.js", "app/login.jsx", "app/profile-form.jsx", "store/store.js", "store/slices/bookingSlice.js", "store/slices/userSlice.js", "app/(tabs)/home.jsx", "app/service-detail.jsx", "app/(tabs)/services.jsx", "app/(tabs)/booking.jsx", "app/(tabs)/profile.jsx", "app/_layout.jsx", "app/homeLocation.jsx", "services/socket.js", "app/profile/profile-edit.jsx"  ]
 }
