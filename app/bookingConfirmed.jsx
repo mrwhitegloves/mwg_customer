@@ -60,7 +60,7 @@ useEffect(() => {
   const { booking } = parsedData;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB', paddingBottom: insets.bottom }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       <StatusBar barStyle="dark-content" />
       
       {/* Header */}
@@ -262,9 +262,17 @@ useEffect(() => {
       </ScrollView>
 
       {/* Bottom Action Buttons */}
-      <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#E5E7EB', gap: 12 }}>
+      {/* <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#E5E7EB', gap: 12 }}>
         <TouchableOpacity style={{ backgroundColor: '#c52222ff', paddingVertical: 16, borderRadius: 12, marginBottom: 10, alignItems: 'center' }} onPress={() => router.push('/services')}>
           <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600', letterSpacing: 0.5 }}>Continue More Services</Text>
+        </TouchableOpacity>
+      </View> */}
+      <View style={{ padding: 16, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#eee' }}>
+        <TouchableOpacity
+          style={{ backgroundColor: '#EF4444', padding: 16, borderRadius: 12, alignItems: 'center' }}
+          onPress={() => router.push('/services')}
+        >
+          <Text style={{ color: '#fff', fontWeight: '600' }}>Continue More Services</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

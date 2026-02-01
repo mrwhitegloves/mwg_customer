@@ -1,4 +1,5 @@
 // app/ServiceDetailScreen.js
+import { font, icon, spacing } from '@/services/ui';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   fetchServiceById,
@@ -108,7 +109,7 @@ export default function ServiceDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF', paddingBottom: insets.bottom }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }} edges={["top", "left", "right", "bottom"]}>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
         {/* Header */}
@@ -116,17 +117,17 @@ export default function ServiceDetailScreen() {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            paddingHorizontal: 16,
-            paddingVertical: 12,
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.md,
             backgroundColor: '#FFF',
             borderBottomWidth: 1,
-            borderBottomColor: '#E0E0E0',
+            borderBottomColor: '#E2E8F0',
           }}
         >
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={icon.lg} color="#1A202C" />
           </TouchableOpacity>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#333', flex: 1, marginLeft: 16 }}>
+          <Text style={{ fontSize: font.xl, fontWeight: '700', color: '#1A202C', flex: 1, marginLeft: spacing.lg }}>
             Service Details
           </Text>
         </View>
@@ -235,8 +236,6 @@ export default function ServiceDetailScreen() {
               </View>
             )}
           </View>
-
-          <View style={{ height: 30 }} />
         </ScrollView>
       </SafeAreaView>
     </>

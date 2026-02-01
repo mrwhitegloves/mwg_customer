@@ -43,6 +43,11 @@ export const connectSocket = async () => {
     console.log('Status Update:', data);
   });
 
+  socket.on("booking.status.updated", (data) => {
+    console.log("Booking Status Updated:", data);
+  });
+
+
   socket.on('bookingExpired', () => {
     console.log('Booking Expired');
   });

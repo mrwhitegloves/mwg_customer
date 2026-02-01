@@ -70,7 +70,10 @@ export default function SingleBookingScreen() {
         return;
       }
 
+      currentSocket.emit('joinBooking', id);
+
       const handleStatusUpdate = (data) => {
+        console.log("handleStatusUpdate called with data:", data);
       if (data.bookingId === id || data._id === id) {
         setBooking(prev => ({
           ...prev,
@@ -86,10 +89,10 @@ export default function SingleBookingScreen() {
       }
     };
 
-      currentSocket.on('bookingStatusUpdate', handleStatusUpdate);
+      currentSocket.on('booking.status.updated', handleStatusUpdate);
 
       cleanup = () => {
-        currentSocket.off('bookingStatusUpdate', handleStatusUpdate);
+        currentSocket.off('booking.status.updated', handleStatusUpdate);
       };
     };
 

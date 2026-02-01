@@ -1,9 +1,15 @@
 // app/home.jsx
 import api from "@/services/api";
 import { connectSocket } from "@/services/socket";
+import { font, icon, radius, spacing } from "@/services/ui";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -32,12 +38,12 @@ import {
 } from "../../store/slices/serviceSlice";
 import { vehicleUpdated } from "../../store/slices/vehicleSlice";
 
-const banners = [
-  { id: 1, image: require("../../assets/images/banner1.png") },
-  { id: 2, image: require("../../assets/images/banner2.png") },
-  { id: 3, image: require("../../assets/images/banner3.png") },
-  { id: 4, image: require("../../assets/images/banner4.png") },
-];
+// const banners = [
+//   { id: 1, image: require("../../assets/images/banner1.png") },
+//   { id: 2, image: require("../../assets/images/banner2.png") },
+//   { id: 3, image: require("../../assets/images/banner3.png") },
+//   { id: 4, image: require("../../assets/images/banner4.png") },
+// ];
 
 // ────── REUSABLE STYLES ──────
 const inputContainer = {
@@ -85,6 +91,7 @@ const Home = () => {
   const [loadingUser, setLoadingUser] = useState(true);
   const [userError, setUserError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [masterAdminData, setMasterAdminData] = useState(null);
 
   // ────── VEHICLE FORM STATE ──────
   const [rcNumber, setRcNumber] = useState("");
@@ -92,6 +99,8 @@ const Home = () => {
 
   // Animation
   const fadeAnim = new Animated.Value(0);
+
+  const bottomSheetModalRef = useRef(null);
 
   // ────── FETCH USER WITH ERROR HANDLING & REFRESH ──────
   const fetchUser = useCallback(async (isRefresh = false) => {
@@ -110,12 +119,24 @@ const Home = () => {
     }
   }, []);
 
+  // === FETCH ADMIN MASTER DATA ===
+  const fetchAdminData = async () => {
+    try {
+      const res = await api.get("/admin/master");
+      console.log("res?.data?.settings", res?.data?.settings);
+      setMasterAdminData(res?.data?.settings);
+    } catch (err) {
+      console.log("Failed to fetch admin data ", err);
+    }
+  };
+
   // ────── INITIAL LOAD + PULL TO REFRESH ──────
   useEffect(() => {
     if (token) {
       fetchUser();
       if (services.length === 0) dispatch(fetchServices());
     }
+    fetchAdminData();
   }, [token, dispatch]);
 
   const onRefresh = useCallback(() => {
@@ -164,6 +185,18 @@ const Home = () => {
   //   }
   //   Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
   // };
+
+  const openVehicleSheet = () => {
+    setIsEditing(currentUser?.vehicles ? false : true);
+    setRcNumber(currentUser?.vehicles?.registrationNumber || "");
+    bottomSheetModalRef.current?.present();
+  };
+
+  const closeVehicleSheet = () => {
+    bottomSheetModalRef.current?.dismiss();
+    setIsEditing(false);
+    setRcNumber("");
+  };
 
   // ────── OPEN VEHICLE MODAL (with prefill if exists) ──────
   const openVehicleModal = () => {
@@ -223,7 +256,8 @@ const Home = () => {
       dispatch(vehicleUpdated());
       onRefresh();
       Toast.show({ type: "success", text1: "Vehicle added successfully!" });
-      closeModal();
+      // closeModal();
+      closeVehicleSheet();
     } catch (error) {
       console.log("Error in vehicle submit", error);
       const msg = error.response?.data?.error || "Invalid RC number";
@@ -255,7 +289,7 @@ const Home = () => {
       style={{
         flex: 1,
         backgroundColor: "#F8FAFC",
-        paddingBottom: insets.bottom,
+        paddingBottom: spacing.xl * 2,
       }}
       edges={["top", "left", "right", "bottom"]}
     >
@@ -307,8 +341,16 @@ const Home = () => {
           {/* Vehicle + Notification */}
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TouchableOpacity
-              onPress={openVehicleModal}
-              style={{ marginRight: 16, backgroundColor: "#ff0000b6", padding: 4, borderRadius: 20 }}
+              // onPress={openVehicleModal}
+              onPress={() => {
+                bottomSheetModalRef.current?.present();
+              }}
+              style={{
+                marginRight: 16,
+                backgroundColor: "#ff0000b6",
+                padding: 4,
+                borderRadius: 20,
+              }}
               activeOpacity={0.8}
             >
               <MaterialCommunityIcons
@@ -455,10 +497,10 @@ const Home = () => {
           showsHorizontalScrollIndicator={false}
           style={{ marginTop: 16 }}
         >
-          {banners.map((banner) => (
+          {masterAdminData?.carouselImages.map((banner) => (
             <Image
-              key={banner.id}
-              source={banner.image}
+              key={banner._id}
+              source={{ uri: banner.url }}
               style={{
                 width: 340,
                 height: 160,
@@ -483,7 +525,7 @@ const Home = () => {
           >
             {[
               {
-                title: 
+                title:
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? "BIKE WASH"
                     : "BASIC WASH",
@@ -491,18 +533,18 @@ const Home = () => {
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? "₹149"
                     : currentUser?.vehicles?.type === "Hatchback"
-                    ? "₹399"
-                    : currentUser?.vehicles?.type === "Sedan"
-                    ? "₹499"
-                    : "₹599",
-                icon: 
+                      ? "₹399"
+                      : currentUser?.vehicles?.type === "Sedan"
+                        ? "₹499"
+                        : "₹599",
+                icon:
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? require("../../assets/images/wash.png")
                     : require("../../assets/images/Basic Wash2.png"),
                 color: "#df3737",
               },
               {
-                title: 
+                title:
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? "WASH & POLISH"
                     : "STANDARD WASH",
@@ -510,30 +552,30 @@ const Home = () => {
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? "₹249"
                     : currentUser?.vehicles?.type === "Hatchback"
-                    ? "₹799"
-                    : currentUser?.vehicles?.type === "Sedan"
-                    ? "₹899"
-                    : "₹999",
-                icon: 
+                      ? "₹799"
+                      : currentUser?.vehicles?.type === "Sedan"
+                        ? "₹899"
+                        : "₹999",
+                icon:
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? require("../../assets/images/polish.png")
-                    : require("../../assets/images/Standard Wash2.png"),
+                    : require("../../assets/images/Standard Wash4.png"),
                 color: "#df3737",
               },
               {
-                title: 
-                currentUser?.vehicles?.type === "Two wheeler"
+                title:
+                  currentUser?.vehicles?.type === "Two wheeler"
                     ? "BIKE DETAILING"
                     : "PREMIUM WASH",
                 price:
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? "₹499"
                     : currentUser?.vehicles?.type === "Hatchback"
-                    ? "₹2499"
-                    : currentUser?.vehicles?.type === "Sedan"
-                    ? "₹2999"
-                    : "₹3499",
-                icon: 
+                      ? "₹2499"
+                      : currentUser?.vehicles?.type === "Sedan"
+                        ? "₹2999"
+                        : "₹3499",
+                icon:
                   currentUser?.vehicles?.type === "Two wheeler"
                     ? require("../../assets/images/detailing.png")
                     : require("../../assets/images/Premium Wash2.png"),
@@ -871,7 +913,7 @@ const Home = () => {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={{ marginTop: 16 }}
+              style={{ marginTop: 16, paddingBottom: spacing.sm }}
             >
               {services.map((service) => (
                 <TouchableOpacity
@@ -988,8 +1030,8 @@ const Home = () => {
                   {currentUser?.vehicles && !isEditing
                     ? "Vehicle Details"
                     : currentUser?.vehicles
-                    ? "Update Vehicle"
-                    : "Add Vehicle"}
+                      ? "Update Vehicle"
+                      : "Add Vehicle"}
                 </Text>
                 <TouchableOpacity activeOpacity={0.8} onPress={closeModal}>
                   <Ionicons name="close" size={24} color="#333" />
@@ -1033,7 +1075,7 @@ const Home = () => {
                       onPress={() => {
                         setIsEditing(true);
                         setRcNumber(
-                          currentUser.vehicles.registrationNumber || ""
+                          currentUser.vehicles.registrationNumber || "",
                         );
                       }}
                     >
@@ -1106,6 +1148,199 @@ const Home = () => {
           </View>
         </View>
       </Modal>
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        snapPoints={["80%"]}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        enablePanDownToClose
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop
+            {...props}
+            disappearsOnIndex={-1}
+            appearsOnIndex={0}
+            opacity={0.6}
+          />
+          // <Pressable
+          //   onPress={() => {
+          //     setIsEditing(false);
+          //     modalBottomSheetRef.current?.dismiss();
+          //   }}
+          //   style={{
+          //     position: 'absolute',
+          //     top: 0,
+          //     bottom: 0,
+          //     left: 0,
+          //     right: 0,
+          //     backgroundColor: 'rgba(0,0,0,0,5)',
+          //   }}
+          // />
+        )}
+        onDismiss={() => {
+          setIsEditing(false);
+          setRcNumber("");
+        }}
+      >
+        <BottomSheetScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            padding: spacing.lg,
+            paddingBottom: spacing.xxl * 5,
+          }}
+          // style={{
+          //   flex: 1,
+          //   padding: spacing.lg,
+          // }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: spacing.md,
+            }}
+          >
+            <Text style={{ fontSize: font.xl, fontWeight: "700" }}>
+              {currentUser?.vehicles && !isEditing
+                ? "Vehicle Details"
+                : currentUser?.vehicles
+                  ? "Update Vehicle"
+                  : "Add Vehicle"}
+            </Text>
+            {/* <TouchableOpacity onPress={closeVehicleSheet}>
+                <Ionicons name="close" size={icon.xl} color="#333" />
+              </TouchableOpacity> */}
+          </View>
+
+          <KeyboardAwareScrollView
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: spacing.xxl }}
+          >
+            {/* No Vehicle → Add Button */}
+            {!currentUser?.vehicles && !isEditing ? (
+              <TouchableOpacity
+                style={[submitButton]}
+                onPress={() => setIsEditing(true)}
+              >
+                <Text style={submitText}>Add Vehicle</Text>
+              </TouchableOpacity>
+            ) : (
+              /* Vehicle Exists → Show Details + Edit */
+              <View>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#f9f0f0ff",
+                    paddingHorizontal: spacing.lg,
+                    paddingVertical: spacing.md,
+                    borderRadius: radius.md,
+                    marginBottom: spacing.md,
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                  onPress={() => {
+                    setIsEditing(true);
+                    setRcNumber(currentUser.vehicles.registrationNumber || "");
+                  }}
+                >
+                  <View style={{ width: "90%" }}>
+                    <Text
+                      style={{
+                        fontWeight: "600",
+                        color: "#000000ff",
+                        fontSize: font.md,
+                      }}
+                    >
+                      RC:{" "}
+                      <Text style={{ color: "#df3737" }}>
+                        {currentUser.vehicles.registrationNumber}
+                      </Text>
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "600",
+                        color: "#000000ff",
+                        fontSize: font.md,
+                      }}
+                    >
+                      Brand:{" "}
+                      <Text style={{ color: "#df3737" }}>
+                        {currentUser.vehicles.make}
+                      </Text>
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "600",
+                        color: "#000000ff",
+                        fontSize: font.md,
+                      }}
+                    >
+                      Model:{" "}
+                      <Text style={{ color: "#df3737" }}>
+                        {currentUser.vehicles.model}
+                      </Text>
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "600",
+                        color: "#000000ff",
+                        fontSize: font.md,
+                      }}
+                    >
+                      Segment:{" "}
+                      <Text style={{ color: "#df3737" }}>
+                        {currentUser.vehicles.type}
+                      </Text>
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="pencil"
+                    style={{ width: "10%" }}
+                    size={icon.md}
+                    color="#df3737"
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Edit/Add Form */}
+            {isEditing && (
+              <>
+                <View style={inputContainer}>
+                  <TextInput
+                    style={inputStyle}
+                    placeholder="RC Number * (e.g., DL10AB1234)"
+                    placeholderTextColor="#CCC"
+                    value={rcNumber}
+                    onChangeText={setRcNumber}
+                    autoCapitalize="characters"
+                    autoFocus={true}
+                  />
+                  <Ionicons name="card-outline" size={20} color="#999" />
+                </View>
+
+                <TouchableOpacity
+                  style={[submitButton, isSubmitting && { opacity: 0.7 }]}
+                  onPress={handleVehicleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={submitText}>
+                      {currentUser?.vehicles ? "Update Vehicle" : "Add Vehicle"}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+          </KeyboardAwareScrollView>
+        </BottomSheetScrollView>
+      </BottomSheetModal>
 
       {/* LOCATION MODAL (unchanged) */}
       <Modal visible={locationModal} transparent animationType="none">

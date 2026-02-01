@@ -80,8 +80,13 @@ export default function LoginScreen() {
       });
     } catch (err) {
       console.log("login error: ",err)
-      const msg = err.response?.data?.error || 'Failed to send OTP. Try again.';
+      const msg = 'Failed to send OTP. Try again.';
       setError(msg);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to login. Try again.'
+      });
     } finally {
       setLoading(false);
     }
@@ -111,7 +116,12 @@ export default function LoginScreen() {
 
       router.replace(redirect || '/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid OTP. Try again.');
+      setError('Invalid OTP. Try again.');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Invalid OTP. Try again.'
+      });
     } finally {
       setLoading(false);
     }

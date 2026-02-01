@@ -11,6 +11,8 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from '../store/store';
 import SplashScreen from './(onboarding)/splash';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -39,6 +41,8 @@ export default function RootLayout() {
     <Provider store={store}>
       <PersistGate loading={<SplashScreen />} persistor={persistor}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <GestureHandlerRootView>
+            <BottomSheetModalProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -52,6 +56,8 @@ export default function RootLayout() {
           </Stack>
           <StatusBar style="light" />
           <Toast />
+          </BottomSheetModalProvider>
+          </GestureHandlerRootView>
         </ThemeProvider>
       </PersistGate>
     </Provider>

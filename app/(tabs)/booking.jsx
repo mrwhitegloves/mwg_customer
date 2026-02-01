@@ -1,5 +1,6 @@
 // app/Booking.jsx
 import api from '@/services/api';
+import { font, icon, radius, spacing } from '@/services/ui';
 import { useAppSelector } from '@/store/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -116,48 +117,48 @@ export default function BookingScreen() {
         key={booking._id}
         style={{
           backgroundColor: '#FFF',
-          borderRadius: 16,
-          padding: 18,
-          marginBottom: 16,
+          borderRadius: radius.lg,
+          padding: spacing.lg,
+          marginBottom: spacing.md,
+          marginHorizontal: spacing.xs * 0.5,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.06,
-          shadowRadius: 10,
-          elevation: 4,
-          // paddingBottom: insets.bottom,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          elevation: 6,
         }}
       >
-        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+        <View style={{ flexDirection: 'row', marginBottom: spacing.md }}>
           <View style={{
-            width: 80,
-            height: 80,
-            borderRadius: 12,
+            width: spacing.xxl * 3,
+            height: spacing.xxl * 3,
+            borderRadius: radius.md,
             backgroundColor: '#F3F4F6',
             overflow: 'hidden',
-            marginRight: 16,
+            marginRight: spacing.lg,
           }}>
             {image ? (
               <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
             ) : (
               <View style={{ flex: 1, backgroundColor: '#E5E7EB', justifyContent: 'center', alignItems: 'center' }}>
-                <Ionicons name="car-outline" size={32} color="#9CA3AF" />
+                <Ionicons name="car-outline" size={icon.xl} color="#9CA3AF" />
               </View>
             )}
           </View>
 
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F2937' }}>
+            <Text style={{ fontSize: font.lg, fontWeight: '700', color: '#1F2937' }}>
               {serviceNames}
             </Text>
-            <Text style={{ fontSize: 14, color: '#4B5563', marginTop: 4 }}>
+            <Text style={{ fontSize: font.md, color: '#4B5563', marginTop: spacing.xs }}>
               {vehicle.make || 'Vehicle'} {vehicle.model || ''} {vehicle.year ? `(${vehicle.year})` : ''}
             </Text>
-            <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4 }}>
+            <Text style={{ fontSize: font.sm, color: '#6B7280', marginTop: spacing.xs }}>
               {new Date(booking.scheduledDate).toLocaleDateString('en-IN', {
                 day: 'numeric', month: 'short', year: 'numeric'
               })} • {booking.scheduledTime}
             </Text>
-            <Text numberOfLines={1} style={{ fontSize: 13, color: '#9CA3AF', marginTop: 4 }}>
+            <Text numberOfLines={1} style={{ fontSize: font.sm, color: '#9CA3AF', marginTop: spacing.xs }}>
               {booking.serviceLocation?.address}
             </Text>
           </View>
@@ -165,19 +166,19 @@ export default function BookingScreen() {
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: '800', color: '#111827' }}>₹{total}</Text>
+            <Text style={{ fontSize: font.xxl, fontWeight: '800', color: '#111827' }}>₹{total}</Text>
             <View style={{
-              marginTop: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 20,
+              marginTop: spacing.sm,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+              borderRadius: radius.pill,
               backgroundColor:
                 booking.status === 'completed' ? '#D1FAE5' :
                 booking.status === 'cancelled' ? '#FECACA' :
                 booking.status === 'pending' ? '#FEF3C7' : '#DBEAFE',
             }}>
               <Text style={{
-                fontSize: 12,
+                fontSize: font.sm,
                 fontWeight: '600',
                 color:
                   booking.status === 'completed' ? '#059669' :
@@ -189,34 +190,34 @@ export default function BookingScreen() {
             </View>
           </View>
 
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
             {['pending', 'confirmed'].includes(booking.status) && (
               <TouchableOpacity
                 onPress={() => confirmCancel(booking._id)}
                 disabled={!isCancellable}
                 style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 10,
-                  borderRadius: 20,
+                  paddingHorizontal: spacing.lg,
+                  paddingVertical: spacing.sm,
+                  borderRadius: radius.pill,
                   backgroundColor: isCancellable ? '#EF4444' : '#E5E7EB',
                 }}
               >
-                <Text style={{ color: '#FFF', fontWeight: '600', fontSize: 13 }}>Cancel</Text>
+                <Text style={{ color: '#FFF', fontWeight: '600', fontSize: font.md }}>Cancel</Text>
               </TouchableOpacity>
             )}
 
             <TouchableOpacity
               onPress={() => router.push(`/singleBooking?id=${booking._id}`)}
               style={{
-                paddingHorizontal: 16,
-                paddingVertical: 10,
-                borderRadius: 20,
+                paddingHorizontal: spacing.lg,
+                paddingVertical: spacing.sm,
+                borderRadius: radius.pill,
                 backgroundColor: '#F3F4F6',
                 borderWidth: 1,
                 borderColor: '#D1D5DB',
               }}
             >
-              <Text style={{ color: '#374151', fontWeight: '600', fontSize: 13 }}>View</Text>
+              <Text style={{ color: '#374151', fontWeight: '600', fontSize: font.md }}>View</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -225,28 +226,28 @@ export default function BookingScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB', paddingBottom: insets.bottom, }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB', paddingBottom: spacing.xs }} edges={["top", "left", "right", "bottom"]}>
       <StatusBar barStyle="dark-content" />
       {/* Header */}
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
       }}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#1F2937" />
+          <Ionicons name="arrow-back" size={icon.lg} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: '#111827', marginLeft: 16, flex: 1 }}>
+        <Text style={{ fontSize: font.xl, fontWeight: '700', color: '#111827', marginLeft: spacing.lg, flex: 1 }}>
           My Bookings
         </Text>
       </View>
 
       {/* Tabs */}
-      <View style={{ flexDirection: 'row', padding: 12, backgroundColor: '#FFF', gap: 10 }}>
+      <View style={{ flexDirection: 'row', padding: spacing.md, backgroundColor: '#FFF', gap: spacing.md }}>
         {[
           { key: 'pending', label: 'Active' },
           { key: 'completed', label: 'Completed' },
@@ -257,8 +258,8 @@ export default function BookingScreen() {
             onPress={() => setActiveTab(tab.key)}
             style={{
               flex: 1,
-              paddingVertical: 12,
-              borderRadius: 16,
+              paddingVertical: spacing.md,
+              borderRadius: radius.md,
               backgroundColor: activeTab === tab.key ? '#EF4444' : '#F3F4F6',
               borderWidth: 1,
               borderColor: activeTab === tab.key ? '#EF4444' : '#D1D5DB',
@@ -267,6 +268,7 @@ export default function BookingScreen() {
             <Text style={{
               textAlign: 'center',
               fontWeight: '600',
+              fontSize: font.md,
               color: activeTab === tab.key ? '#FFF' : '#374151',
             }}>
               {tab.label}
@@ -278,52 +280,52 @@ export default function BookingScreen() {
       {/* Content */}
       {loading && !refreshing ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FAFB' }}>
-    <ActivityIndicator size="large" color="#EF4444" />
-    <Text style={{ marginTop: 16, fontSize: 16, color: '#6B7280', fontWeight: '500' }}>
-      Loading your bookings...
-    </Text>
-  </View>
+          <ActivityIndicator size="large" color="#EF4444" />
+          <Text style={{ marginTop: spacing.lg, fontSize: font.lg, color: '#6B7280', fontWeight: '500' }}>
+            Loading your bookings...
+          </Text>
+        </View>
       ) : error ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <Ionicons name="cloud-offline-outline" size={64} color="#9CA3AF" />
-          <Text style={{ fontSize: 18, fontWeight: '600', color: '#374151', marginTop: 16 }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl }}>
+          <Ionicons name="cloud-offline-outline" size={icon.xl * 2} color="#9CA3AF" />
+          <Text style={{ fontSize: font.xxl, fontWeight: '600', color: '#374151', marginTop: spacing.xl }}>
             Something went wrong
           </Text>
-          <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginTop: 8 }}>
+          <Text style={{ fontSize: font.lg, color: '#6B7280', textAlign: 'center', marginTop: spacing.md }}>
             {error}
           </Text>
           <TouchableOpacity
             onPress={onRefresh}
             style={{
-              marginTop: 20,
+              marginTop: spacing.xxl,
               backgroundColor: '#EF4444',
-              paddingHorizontal: 32,
-              paddingVertical: 14,
-              borderRadius: 30,
+              paddingHorizontal: spacing.xxl * 2,
+              paddingVertical: spacing.lg,
+              borderRadius: radius.pill,
             }}
           >
-            <Text style={{ color: '#FFF', fontWeight: '600' }}>Retry</Text>
+            <Text style={{ color: '#FFF', fontWeight: '600', fontSize: font.lg }}>Retry</Text>
           </TouchableOpacity>
         </View>
       ) : filteredBookings.length === 0 ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <Ionicons name="receipt-outline" size={70} color="#D1D5DB" />
-          <Text style={{ fontSize: 18, fontWeight: '600', color: '#6B7280', marginTop: 16 }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl }}>
+          <Ionicons name="receipt-outline" size={icon.xl * 2} color="#D1D5DB" />
+          <Text style={{ fontSize: font.xl, fontWeight: '600', color: '#6B7280', marginTop: spacing.xl }}>
             No {activeTab === 'pending' ? 'active' : activeTab} bookings
           </Text>
-          <Text style={{ fontSize: 14, color: '#9CA3AF', textAlign: 'center', marginTop: 8 }}>
+          <Text style={{ fontSize: font.md, color: '#9CA3AF', textAlign: 'center', marginTop: spacing.md }}>
             {activeTab === 'pending' ? 'Book your first car wash!' : 'Your history will appear here'}
           </Text>
         </View>
       ) : (
         <ScrollView
-    refreshControl={
-      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#EF4444']} />
-    }
-    contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 20 }}
-  >
-    {filteredBookings.map(renderItem)}
-  </ScrollView>
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#EF4444']} />
+          }
+          contentContainerStyle={{ padding: spacing.sm, paddingBottom: spacing.xxl + insets.bottom }}
+        >
+          {filteredBookings.map(renderItem)}
+        </ScrollView>
       )}
 
       {/* Cancel Confirmation Modal */}
@@ -354,7 +356,7 @@ export default function BookingScreen() {
           </View>
         </View>
       </Modal>
-      <View style={{ height: 30, backgroundColor: '#fff' }} />
+      {/* <View style={{ height: 30, backgroundColor: '#fff' }} /> */}
     </SafeAreaView>
   );
 }

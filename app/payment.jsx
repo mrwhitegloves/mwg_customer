@@ -144,7 +144,7 @@ export default function PaymentScreen() {
 
     // ────── SEND AS JSON STRING (ONLY ONCE!) ──────
     router.replace({
-        pathname: '/bookingConfirmed',
+        pathname: '/BookingSuccessScreen',
         params: { bookingData: JSON.stringify(bookingInfo) },
       });
 
@@ -277,7 +277,7 @@ export default function PaymentScreen() {
 
     // ────── SEND AS JSON STRING (ONLY ONCE!) ──────
     router.replace({
-        pathname: '/bookingConfirmed',
+        pathname: '/BookingSuccessScreen',
         params: { bookingData: JSON.stringify(bookingInfo) },
       });
 

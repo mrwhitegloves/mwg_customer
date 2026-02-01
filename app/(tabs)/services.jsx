@@ -195,22 +195,22 @@ export default function ServicesScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC', paddingBottom: spacing.xl }} edges={["top", "left", "right", "bottom"]}>
       <StatusBar barStyle="dark-content" />
       {/* Header */}
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: spacing.xl,
-        paddingVertical: spacing.lg,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
       }}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={icon.xl} color="#1A202C" />
+          <Ionicons name="arrow-back" size={icon.lg} color="#1A202C" />
         </TouchableOpacity>
-        <Text style={{ fontSize: font.xxl, fontWeight: '800', color: '#1A202C', marginLeft: spacing.lg, flex: 1 }}>
+        <Text style={{ fontSize: font.xl, fontWeight: '700', color: '#1A202C', marginLeft: spacing.lg, flex: 1 }}>
           Services
         </Text>
       </View>
@@ -287,7 +287,7 @@ export default function ServicesScreen() {
           <Text style={{ fontSize: font.xxl, fontWeight: '700', color: '#1E293B', marginTop: spacing.xl }}>
             Connection Failed
           </Text>
-          <Text style={{ fontSize: font.md, color: '#64748B', textAlign: 'center', marginTop: spacing.md, lineHeight: 22 }}>
+          <Text style={{ fontSize: font.md, color: '#64748B', textAlign: 'center', marginTop: spacing.md }}>
             {error}
           </Text>
           <TouchableOpacity
@@ -304,7 +304,7 @@ export default function ServicesScreen() {
           </TouchableOpacity>
         </View>
       )}
-      <View style={{ height: spacing.xxl * 2.8, backgroundColor: '#fff' }} />
+      {/* <View style={{ height: spacing.xxl * 2.8, backgroundColor: '#fff' }} /> */}
     </SafeAreaView>
   );
 }

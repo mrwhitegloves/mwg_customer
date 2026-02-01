@@ -1,5 +1,6 @@
 // app/profile.jsx
 import api from '@/services/api';
+import { font, icon, radius, spacing } from '@/services/ui';
 import { useAppDispatch } from '@/store/hooks';
 import { logoutAsync } from '@/store/slices/authSlice';
 import { persistor } from '@/store/store';
@@ -111,22 +112,22 @@ export default function Profile() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC', paddingBottom: insets.bottom, }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={["top", "left", "right", "bottom"]}>
       <StatusBar barStyle="dark-content" />
       {/* Header */}
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 18,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
       }}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#1A202C" />
+          <Ionicons name="arrow-back" size={icon.lg} color="#1A202C" />
         </TouchableOpacity>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: '#1A202C', marginLeft: 20, flex: 1 }}>
+        <Text style={{ fontSize: font.xl, fontWeight: '700', color: '#1A202C', marginLeft: spacing.lg, flex: 1 }}>
           My Profile
         </Text>
       </View>
@@ -135,33 +136,33 @@ export default function Profile() {
       {loading && !refreshing ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color="#cc2e2e" />
-          <Text style={{ marginTop: 16, color: '#64748B', fontSize: 16 }}>Loading your profile...</Text>
+          <Text style={{ marginTop: spacing.lg, color: '#64748B', fontSize: font.lg }}>Loading your profile...</Text>
         </View>
       ) : error ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 30 }}>
-          <Ionicons name="cloud-offline-outline" size={80} color="#94A3B8" />
-          <Text style={{ fontSize: 20, fontWeight: '700', color: '#1E293B', marginTop: 20 }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl }}>
+          <Ionicons name="cloud-offline-outline" size={icon.xl * 2} color="#94A3B8" />
+          <Text style={{ fontSize: font.xxl, fontWeight: '700', color: '#1E293B', marginTop: spacing.xl }}>
             Unable to load profile
           </Text>
-          <Text style={{ fontSize: 15, color: '#64748B', textAlign: 'center', marginTop: 10, lineHeight: 22 }}>
+          <Text style={{ fontSize: font.lg, color: '#64748B', textAlign: 'center', marginTop: spacing.md, lineHeight: 24 }}>
             {error}
           </Text>
           <TouchableOpacity
             onPress={onRefresh}
             style={{
-              marginTop: 30,
+              marginTop: spacing.xxl,
               backgroundColor: '#cc2e2e',
-              paddingHorizontal: 40,
-              paddingVertical: 16,
-              borderRadius: 30,
+              paddingHorizontal: spacing.xxl * 2,
+              paddingVertical: spacing.lg,
+              borderRadius: radius.pill,
             }}
           >
-            <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 16 }}>Retry</Text>
+            <Text style={{ color: '#FFF', fontWeight: '700', fontSize: font.lg }}>Retry</Text>
           </TouchableOpacity>
         </View>
       ) : !user ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#94A3B8' }}>No profile data</Text>
+          <Text style={{ color: '#94A3B8', fontSize: font.lg }}>No profile data</Text>
         </View>
       ) : (
         <ScrollView
@@ -174,14 +175,15 @@ export default function Profile() {
             />
           }
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: spacing.xxl * 2 }}
         >
           {/* Profile Card */}
           <View style={{
             backgroundColor: '#FFF',
-            margin: 16,
-            borderRadius: 24,
-            padding: 24,
+            marginHorizontal: spacing.lg,
+            marginTop: spacing.lg,
+            borderRadius: radius.xl,
+            padding: spacing.xl,
             alignItems: 'center',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
@@ -189,11 +191,11 @@ export default function Profile() {
             shadowRadius: 12,
             elevation: 8,
           }}>
-            <View style={{ position: 'relative', marginBottom: 20 }}>
+            <View style={{ position: 'relative', marginBottom: spacing.xl }}>
               <View style={{
-                width: 130,
-                height: 130,
-                borderRadius: 65,
+                width: spacing.xxl * 5,
+                height: spacing.xxl * 5,
+                borderRadius: spacing.xxl * 2.5,
                 backgroundColor: '#F3F4F6',
                 overflow: 'hidden',
                 borderWidth: 5,
@@ -207,7 +209,7 @@ export default function Profile() {
                   />
                 ) : (
                   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Ionicons name="person" size={60} color="#94A3B8" />
+                    <Ionicons name="person" size={icon.xl * 2} color="#94A3B8" />
                   </View>
                 )}
               </View>
@@ -219,39 +221,45 @@ export default function Profile() {
                   bottom: 0,
                   right: 0,
                   backgroundColor: '#cc2e2e',
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
+                  width: spacing.xxl * 2,
+                  height: spacing.xxl * 2,
+                  borderRadius: spacing.xxl,
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: 4,
                   borderColor: '#FFF',
                 }}
               >
-                <Ionicons name="camera" size={20} color="#FFF" />
+                <Ionicons name="camera" size={icon.lg} color="#FFF" />
               </TouchableOpacity>
             </View>
 
-            <Text style={{ fontSize: 26, fontWeight: '800', color: '#1A202C', marginBottom: 6 }}>
+            <Text style={{ fontSize: font.xxl, fontWeight: '800', color: '#1A202C', marginBottom: spacing.sm }}>
               {user.name || 'User'}
             </Text>
-            <Text style={{ fontSize: 16, color: '#64748B' }}>
+            <Text style={{ fontSize: font.lg, color: '#64748B' }}>
               {user.email || 'No email added'}
             </Text>
-            <Text style={{ fontSize: 15, color: '#94A3B8', marginTop: 8 }}>
-              {user.phone}
+            <Text style={{ fontSize: font.md, color: '#94A3B8', marginTop: spacing.sm }}>
+              {user.phone && (`+${user.phone}`)}
             </Text>
           </View>
 
           {/* Menu Items */}
-          <View style={{ backgroundColor: '#FFF', marginHorizontal: 16, borderRadius: 20, overflow: 'hidden' }}>
+          <View style={{ 
+            backgroundColor: '#FFF', 
+            marginHorizontal: spacing.lg,
+            marginTop: spacing.md,
+            borderRadius: radius.xl,
+            overflow: 'hidden' 
+            }}>
             <TouchableOpacity
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingVertical: 20,
-                paddingHorizontal: 20,
+                paddingVertical: spacing.md,
+                paddingHorizontal: spacing.xl,
                 borderBottomWidth: 1,
                 borderBottomColor: '#F1F5F9',
               }}
@@ -259,20 +267,20 @@ export default function Profile() {
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
+                  width: spacing.xxl * 2,
+                  height: spacing.xxl * 2,
+                  borderRadius: spacing.xxl * 1.25,
                   backgroundColor: '#ECFDF5',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                  <Ionicons name="person-outline" size={26} color="#10B981" />
+                  <Ionicons name="person-outline" size={icon.lg} color="#10B981" />
                 </View>
-                <Text style={{ fontSize: 17, fontWeight: '600', color: '#1E293B', marginLeft: 16 }}>
+                <Text style={{ fontSize: font.lg, fontWeight: '600', color: '#1E293B', marginLeft: spacing.lg }}>
                   Edit Profile
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={22} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={icon.lg} color="#94A3B8" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -280,8 +288,8 @@ export default function Profile() {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingVertical: 20,
-                paddingHorizontal: 20,
+                paddingVertical: spacing.xl,
+                paddingHorizontal: spacing.xl,
                 borderBottomWidth: 1,
                 borderBottomColor: '#F1F5F9',
               }}
@@ -289,90 +297,80 @@ export default function Profile() {
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
+                  width: spacing.xxl * 2,
+                  height: spacing.xxl * 2,
+                  borderRadius: spacing.xxl * 1.25,
                   backgroundColor: '#ECFDF5',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                  <Ionicons name="car-sport" size={26} color="#10B981" />
+                  <Ionicons name="car-sport" size={icon.lg} color="#10B981" />
                 </View>
-                <Text style={{ fontSize: 17, fontWeight: '600', color: '#1E293B', marginLeft: 16 }}>
+                <Text style={{ fontSize: font.lg, fontWeight: '600', color: '#1E293B', marginLeft: spacing.lg }}>
                   My Vehicle
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={22} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={icon.lg} color="#94A3B8" />
             </TouchableOpacity>
 
-            <TouchableOpacity
-  style={{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  }}
-  onPress={openPrivacyPolicy}
->
-  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-    <View
-      style={{
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: '#EFF6FF',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <Ionicons name="document-text-outline" size={26} color="#2563EB" />
-    </View>
-
-    <Text
-      style={{
-        fontSize: 17,
-        fontWeight: '600',
-        color: '#1E293B',
-        marginLeft: 16,
-      }}
-    >
-      Privacy Policy
-    </Text>
-  </View>
-
-  <Ionicons name="open-outline" size={22} color="#94A3B8" />
-</TouchableOpacity>
-
-
+            {/* Privacy Policy */}
             <TouchableOpacity
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingVertical: 20,
-                paddingHorizontal: 20,
+                paddingVertical: spacing.xl,
+                paddingHorizontal: spacing.xl,
+                borderBottomWidth: 1,
+                borderBottomColor: '#F1F5F9',
+              }}
+              onPress={openPrivacyPolicy}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{
+                  width: spacing.xxl * 2,
+                  height: spacing.xxl * 2,
+                  borderRadius: spacing.xxl * 1.25,
+                  backgroundColor: '#EFF6FF',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  <Ionicons name="document-text-outline" size={icon.lg} color="#2563EB" />
+                </View>
+                <Text style={{ fontSize: font.lg, fontWeight: '600', color: '#1E293B', marginLeft: spacing.lg }}>
+                  Privacy Policy
+                </Text>
+              </View>
+              <Ionicons name="open-outline" size={icon.lg} color="#94A3B8" />
+            </TouchableOpacity>
+
+            {/* Logout */}
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingVertical: spacing.xl,
+                paddingHorizontal: spacing.xl,
               }}
               onPress={() => setLogoutModal(true)}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
+                  width: spacing.xxl * 2,
+                  height: spacing.xxl * 2,
+                  borderRadius: spacing.xxl * 1.25,
                   backgroundColor: '#FEF2F2',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                  <Ionicons name="log-out-outline" size={26} color="#EF4444" />
+                  <Ionicons name="log-out-outline" size={icon.lg} color="#EF4444" />
                 </View>
-                <Text style={{ fontSize: 17, fontWeight: '600', color: '#EF4444', marginLeft: 16 }}>
+                <Text style={{ fontSize: font.lg, fontWeight: '600', color: '#EF4444', marginLeft: spacing.lg }}>
                   Logout
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={22} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={icon.lg} color="#94A3B8" />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -385,14 +383,14 @@ export default function Profile() {
           backgroundColor: 'rgba(0,0,0,0.6)',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: 20,
+          padding: spacing.xl,
         }}>
           <View style={{
             backgroundColor: '#FFF',
-            borderRadius: 24,
-            padding: 32,
+            borderRadius: radius.xl,
+            padding: spacing.xxl,
             width: '100%',
-            maxWidth: 380,
+            maxWidth: 400,
             alignItems: 'center',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 10 },
@@ -400,25 +398,25 @@ export default function Profile() {
             shadowRadius: 20,
             elevation: 20,
           }}>
-            <Ionicons name="log-out-outline" size={70} color="#EF4444" />
-            <Text style={{ fontSize: 24, fontWeight: '800', color: '#1E293B', marginTop: 20 }}>
+            <Ionicons name="log-out-outline" size={icon.xl * 2} color="#EF4444" />
+            <Text style={{ fontSize: font.xxl, fontWeight: '800', color: '#1E293B', marginTop: spacing.xl }}>
               Logout?
             </Text>
-            <Text style={{ fontSize: 16, color: '#64748B', textAlign: 'center', marginTop: 12, lineHeight: 24 }}>
+            <Text style={{ fontSize: font.md, color: '#64748B', textAlign: 'center', marginTop: spacing.md, lineHeight: 24 }}>
               Are you sure you want to log out of your account?
             </Text>
 
-            <View style={{ width: '100%', marginTop: 32, gap: 12 }}>
+            <View style={{ width: '100%', marginTop: spacing.xxl, gap: spacing.md }}>
               <TouchableOpacity
                 onPress={handleLogout}
                 style={{
                   backgroundColor: '#EF4444',
-                  paddingVertical: 16,
-                  borderRadius: 16,
+                  paddingVertical: spacing.lg,
+                  borderRadius: radius.lg,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 17 }}>
+                <Text style={{ color: '#FFF', fontWeight: '700', fontSize: font.lg }}>
                   Yes, Logout
                 </Text>
               </TouchableOpacity>
@@ -427,12 +425,12 @@ export default function Profile() {
                 onPress={() => setLogoutModal(false)}
                 style={{
                   backgroundColor: '#F3F4F6',
-                  paddingVertical: 16,
-                  borderRadius: 16,
+                  paddingVertical: spacing.lg,
+                  borderRadius: radius.lg,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: '#374151', fontWeight: '700', fontSize: 17 }}>
+                <Text style={{ color: '#374151', fontWeight: '700', fontSize: font.lg }}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -440,7 +438,6 @@ export default function Profile() {
           </View>
         </View>
       </Modal>
-      <View style={{ height: 30, backgroundColor: '#fff' }} />
 
       <Toast />
     </SafeAreaView>
