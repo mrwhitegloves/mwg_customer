@@ -12,9 +12,19 @@ export const generateNext14Days = () => {
   for (let i = 0; i < 14; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
+
     const key = formatDateKey(d);
     const label = `${d.toLocaleString('en-US', { weekday: 'short' })}-${d.getDate()}`;
-    days.push({ date: d, key, label });
+
+    // Local date instead of UTC
+    const dateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    days.push({
+      date: new Date(d),
+      key,
+      label,
+      dateString
+    });
   }
 
   return days;
@@ -22,15 +32,15 @@ export const generateNext14Days = () => {
 
 export const generateTimeSlots = () => {
   const slots = [];
-  for (let h = 8; h <= 17; h++) {
+  for (let h = 6; h <= 18; h++) {
     ['00', '30'].forEach((m) => {
-      if (h === 17 && m === '30') return; // 5:30 PM is after 5 PM
+      if (h === 18 && m === '30') return; // 6:30 PM is after 6 PM
       const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
       const ampm = h >= 12 ? 'PM' : 'AM';
       slots.push(`${hour12}:${m} ${ampm}`);
     });
   }
-  return slots; // ["8:00 AM","8:30 AM",...,"5:00 PM"]
+  return slots; // ["6:00 AM","6:30 AM",...,"6:00 PM"]
 };
 
 

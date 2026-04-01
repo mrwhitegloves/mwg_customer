@@ -67,6 +67,7 @@ export default function BookingScreen() {
   }, []);
 
   const onRefresh = useCallback(() => {
+    console.log('Refreshing bookings...');
     setError('');
     fetchBookings(true);
   }, []);
@@ -118,7 +119,7 @@ export default function BookingScreen() {
         style={{
           backgroundColor: '#FFF',
           borderRadius: radius.lg,
-          padding: spacing.lg,
+          overflow: 'hidden',
           marginBottom: spacing.md,
           marginHorizontal: spacing.xs * 0.5,
           shadowColor: '#000',
@@ -128,6 +129,39 @@ export default function BookingScreen() {
           elevation: 6,
         }}
       >
+        {/* ✅ Expired Banner - Only shows when status is 'expired' */}
+  {booking.status === 'expired' && (
+    <View
+      style={{
+        paddingVertical: 10,
+        paddingHorizontal: spacing.lg,
+        backgroundColor: '#FEF3C7',
+        borderBottomWidth: 1,
+        borderBottomColor: '#FCD34D',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+      }}
+    >
+      <Ionicons name="alert-circle" size={16} color="#D97706" />
+      <Text
+        style={{
+          fontSize: font.sm,
+          fontWeight: '700',
+          color: '#92400E',
+          letterSpacing: 0.3,
+        }}
+      >
+        This booking has expired
+      </Text>
+      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => router.push({ pathname: "/services" })}>
+        <Text style={{ fontSize: font.xs, color: '#B45309', fontWeight: '500' }}>
+          Rebook Now →
+        </Text>
+      </TouchableOpacity>
+    </View>
+  )}
+        <View style={{ padding: spacing.lg }}>
         <View style={{ flexDirection: 'row', marginBottom: spacing.md }}>
           <View style={{
             width: spacing.xxl * 3,
@@ -147,6 +181,7 @@ export default function BookingScreen() {
           </View>
 
           <View style={{ flex: 1 }}>
+          <TouchableOpacity onPress={() => router.push(`/singleBooking?id=${booking._id}`)}>
             <Text style={{ fontSize: font.lg, fontWeight: '700', color: '#1F2937' }}>
               {serviceNames}
             </Text>
@@ -161,6 +196,7 @@ export default function BookingScreen() {
             <Text numberOfLines={1} style={{ fontSize: font.sm, color: '#9CA3AF', marginTop: spacing.xs }}>
               {booking.serviceLocation?.address}
             </Text>
+          </TouchableOpacity>
           </View>
         </View>
 
@@ -220,6 +256,7 @@ export default function BookingScreen() {
               <Text style={{ color: '#374151', fontWeight: '600', fontSize: font.md }}>View</Text>
             </TouchableOpacity>
           </View>
+        </View>
         </View>
       </View>
     );
@@ -316,6 +353,18 @@ export default function BookingScreen() {
           <Text style={{ fontSize: font.md, color: '#9CA3AF', textAlign: 'center', marginTop: spacing.md }}>
             {activeTab === 'pending' ? 'Book your first car wash!' : 'Your history will appear here'}
           </Text>
+          <TouchableOpacity
+            onPress={onRefresh}
+            style={{
+              marginTop: spacing.xl,
+              backgroundColor: '#EF4444',
+              paddingHorizontal: spacing.xl * 2,
+              paddingVertical: spacing.md,
+              borderRadius: radius.pill,
+            }}
+          >
+            <Text style={{ color: '#FFF', fontWeight: '600', fontSize: font.md }}>Refresh</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView

@@ -91,6 +91,7 @@ export default function ServicesScreen() {
   }, []);
 
   const renderServiceItem = ({ item }) => {
+    console.log('Rendering service item:', item);
     const visibleFeatures = item.featuresList.slice(0, 3);
     const moreCount = item.featuresList.length - 3;
 
@@ -172,7 +173,26 @@ export default function ServicesScreen() {
           <Text style={{ fontSize: font.xs, color: '#718096' }}>per service</Text>
           </View>
 
-          <TouchableOpacity
+          {item.name === 'Monthly Subscription' ? (
+            <TouchableOpacity
+            style={{
+              backgroundColor: '#EF4444',
+              paddingHorizontal: spacing.xl,
+              paddingVertical: spacing.sm,
+              borderRadius: radius.md,
+              marginTop: spacing.md,
+            }}
+            onPress={() =>
+              router.push({
+                pathname: '/subscriptionCheckout',
+                params: { services: JSON.stringify(item) },
+              })
+            }
+          >
+            <Text style={{ color: '#FFF', fontWeight: '700', fontSize: font.md }}>Book Now</Text>
+          </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
             style={{
               backgroundColor: '#EF4444',
               paddingHorizontal: spacing.xl,
@@ -189,6 +209,7 @@ export default function ServicesScreen() {
           >
             <Text style={{ color: '#FFF', fontWeight: '700', fontSize: font.md }}>Book Now</Text>
           </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -277,6 +298,7 @@ export default function ServicesScreen() {
       {error && !loading && !refreshing && (
         <View style={{
           // ...StyleSheet.absoluteFillObject,
+          flex: 1,
           backgroundColor: 'rgba(255,255,255,0.98)',
           justifyContent: 'center',
           alignItems: 'center',

@@ -11,6 +11,7 @@ export default function BookingSuccessScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { bookingData } = useLocalSearchParams();
+  console.log('Booking Data on Success Screen:', bookingData); // Debug log
 
   const player = useVideoPlayer(require('../assets/images/success_video.mp4'));
   const explosion = useRef(null);

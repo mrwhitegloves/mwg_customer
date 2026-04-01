@@ -8,7 +8,7 @@ import {
   BottomSheetModal,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -96,6 +96,17 @@ const Home = () => {
   // ────── VEHICLE FORM STATE ──────
   const [rcNumber, setRcNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ── V2 fix: re-apply StatusBar style every time this screen focuses ──
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('light-content', true); // true = animated
+      return () => {
+        // Reset to dark when leaving home (for all other screens)
+        StatusBar.setBarStyle('dark-content', true);
+      };
+    }, [])
+  );
 
   // Animation
   const fadeAnim = new Animated.Value(0);
@@ -293,7 +304,6 @@ const Home = () => {
       }}
       edges={["top", "left", "right", "bottom"]}
     >
-      <StatusBar barStyle="light-content" />
       {/* Header Background */}
       <Image
         source={require("../../assets/images/bg-design4.png")}
@@ -969,7 +979,36 @@ const Home = () => {
                         ★ {service.rating || 4.8}
                       </Text>
                     </View>
-                    <TouchableOpacity
+
+                    {service.name === 'Monthly Subscription' ? (
+                      <TouchableOpacity
+                      style={{
+                        backgroundColor: "#df3737",
+                        padding: 8,
+                        borderRadius: 8,
+                        marginTop: 8,
+                        alignItems: "center",
+                      }}
+                      activeOpacity={0.8}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/subscriptionCheckout",
+                          params: { services: JSON.stringify(service) },
+                        })
+                      }
+                    >
+                      <Text
+                        style={{
+                          color: "#fff",
+                          fontWeight: "bold",
+                          fontSize: 12,
+                        }}
+                      >
+                        Book Now
+                      </Text>
+                    </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
                       style={{
                         backgroundColor: "#df3737",
                         padding: 8,
@@ -995,6 +1034,7 @@ const Home = () => {
                         Book Now
                       </Text>
                     </TouchableOpacity>
+                    )}
                   </View>
                 </TouchableOpacity>
               ))}

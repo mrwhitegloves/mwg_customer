@@ -1,4 +1,3 @@
-// app/checkout.jsx
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -13,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Calendar } from "react-native-calendars";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import {
   SafeAreaView,
@@ -20,14 +20,10 @@ import {
 } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import api from "../services/api";
-import {
-  generateNext14Days,
-  generateTimeSlots,
-  isTimeSlotEnabled,
-} from "../services/dateTime";
+import { generateNext14Days, generateTimeSlots } from "../services/dateTime";
 import { useAppSelector } from "../store/hooks";
 
-export default function CheckoutScreen() {
+export default function SubscriptionCheckoutScreen() {
   const router = useRouter();
   const { services } = useLocalSearchParams();
   const parsedService = services ? JSON.parse(services) : null;
@@ -38,9 +34,14 @@ export default function CheckoutScreen() {
   const next14Days = generateNext14Days();
   const allTimeSlots = generateTimeSlots();
 
+  // ==================== NEW STATES FOR MONTHLY SUBSCRIPTION ====================
+  const [startDateKey, setStartDateKey] = useState(""); // Selected start date key
+  const [gapType, setGapType] = useState("everySecondDay");
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("early-morning"); // early-morning / late-morning / afternoon / evening
+  const [generatedDates, setGeneratedDates] = useState([]);
+  // ============================================================================
+
   const [currentUser, setCurrentUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -119,8 +120,6 @@ export default function CheckoutScreen() {
   useEffect(() => {
     const fetchCoupons = async () => {
       if (!selectedAddress?.postalCode || !servicePrice) return;
-      console.log("selectedAddress", selectedAddress);
-      console.log("servicePrice", servicePrice);
 
       try {
         const res = await api.get("/coupons/available", {
@@ -137,7 +136,6 @@ export default function CheckoutScreen() {
 
     fetchCoupons();
   }, [selectedAddress, servicePrice]);
-  console.log("Available Coupons:", availableCoupons);
 
   // === APPLY COUPON ===
   const handleApplyCoupon = async () => {
@@ -193,7 +191,6 @@ export default function CheckoutScreen() {
       let res;
 
       if (isEditAddress && editingAddressId) {
-        // ✅ UPDATE ADDRESS
         res = await api.put(
           `/auth/delivery-address/${editingAddressId}`,
           newAddress,
@@ -208,7 +205,6 @@ export default function CheckoutScreen() {
         setSelectedAddress(res.data.address);
         Toast.show({ type: "success", text1: "Address updated successfully" });
       } else {
-        // ✅ ADD ADDRESS (existing logic)
         res = await api.post("/auth/delivery-address", newAddress);
         const added = res.data.deliveryAddresses.at(-1);
         setAddresses((prev) => [...prev, added]);
@@ -216,7 +212,6 @@ export default function CheckoutScreen() {
         Toast.show({ type: "success", text1: "Address added successfully" });
       }
 
-      // RESET
       setAddAddressModal(false);
       setIsEditAddress(false);
       setEditingAddressId(null);
@@ -230,8 +225,6 @@ export default function CheckoutScreen() {
         label: "Home",
       });
       setAddressModal(false);
-
-      // const added = res.data.deliveryAddresses[res.data.deliveryAddresses.length - 1];
     } catch (err) {
       Toast.show({
         type: "error",
@@ -242,17 +235,52 @@ export default function CheckoutScreen() {
     }
   };
 
+  // === NEW: Generate Dates based on Start Date + Gap ===
+  const generateServiceDates = (startKey, gap) => {
+    console.log("Generating dates with startKey:", startKey, "and gap:", gap);
+    console.log("Next 14 Days:", next14Days);
+    const startObj = next14Days.find((d) => d.key === startKey)?.dateString;
+    console.log("Start Date Object:", startObj);
+    if (!startObj) return [];
+
+    const dates = [];
+    let current = new Date(startObj);
+    const end = new Date(current);
+    end.setDate(end.getDate() + 30); // 30 days max
+
+    console.log("Generating dates from", current.toString(), "to", end, "with gap of", gap);
+
+    while (current <= end && dates.length < 10) {
+      // max 10 visits
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + gap);
+    }
+    return dates;
+  };
+
+  // Auto-generate dates when start date or gap changes
+  useEffect(() => {
+    if (startDateKey) {
+      const gap = gapType === "everySecondDay" ? 2 : 3;
+      const dates = generateServiceDates(startDateKey, gap);
+      setGeneratedDates(dates);
+    }
+  }, [startDateKey, gapType]);
+
+  console.log("Selected Start Date Key:", startDateKey);
+
+  // === PROCEED TO PAYMENT ===
   const handleProceed = () => {
     if (
-      !selectedDate ||
-      !selectedTime ||
+      !startDateKey ||
+      !selectedTimeSlot ||
       !selectedAddress ||
       currentUser?.vehicles == null
     ) {
       let missingFields = [];
 
-      if (!selectedDate) missingFields.push("date");
-      if (!selectedTime) missingFields.push("time");
+      if (!startDateKey) missingFields.push("date");
+      if (!selectedTimeSlot) missingFields.push("time");
       if (!selectedAddress) missingFields.push("delivery address");
       if (currentUser?.vehicles == null) missingFields.push("vehicle");
 
@@ -262,15 +290,20 @@ export default function CheckoutScreen() {
       return;
     }
 
-    const selectedDateObj = next14Days.find(
-      (d) => d.key === selectedDate,
-    )?.date;
-    if (!selectedDateObj) return;
+    // const startDateKeyObj = next14Days.find(
+    //   (d) => d.key === startDateKey,
+    // )?.date;
+    // if (!startDateKeyObj) return;
 
-    const year = selectedDateObj.getFullYear();
-    const month = String(selectedDateObj.getMonth() + 1).padStart(2, "0");
-    const day = String(selectedDateObj.getDate()).padStart(2, "0");
-    const scheduledDate = `${year}-${month}-${day}`;
+    // const year = startDateKeyObj.getFullYear();
+    // const month = String(startDateKeyObj.getMonth() + 1).padStart(2, "0");
+    // const day = String(startDateKeyObj.getDate()).padStart(2, "0");
+    // const scheduledDate = `${year}-${month}-${day}`;
+
+    const startDateObj = next14Days.find((d) => d.key === startDateKey)?.dateString;
+    console.log("Corresponding Start Date Object:", startDateObj);
+    const scheduledDate = startDateObj.toString().split("T")[0];
+    console.log("Formatted Scheduled Date:", scheduledDate);
 
     router.push({
       pathname: "/payment",
@@ -279,7 +312,14 @@ export default function CheckoutScreen() {
           currentUser: currentUser,
           service: parsedService,
           scheduledDate,
-          scheduledTime: selectedTime,
+          scheduledTime:
+            selectedTimeSlot === "early-morning"
+              ? "6-9 AM"
+              : selectedTimeSlot === "late-morning"
+                ? "10-12 AM"
+                : selectedTimeSlot === "afternoon"
+                  ? "1-3 PM"
+                  : "4-6 PM",
           deliveryAddressId: selectedAddress._id,
           vehicleId: currentUser?.vehicles?._id,
           vehicles: currentUser?.vehicles,
@@ -292,7 +332,16 @@ export default function CheckoutScreen() {
           discount: discount,
           couponCode: selectedCoupon ? selectedCoupon.code : null,
           userSelectedAddress: selectedAddress,
-          isMonthlySubscription: false,
+
+          // ==================== NEW FIELDS FOR MONTHLY SUBSCRIPTION ====================
+          isMonthlySubscription: true,
+          subscriptionStartDate: scheduledDate,
+          gapType: gapType, // "everySecondDay" or "everyThirdDay"
+          generatedDates: generatedDates.map(
+            (d) => d.toISOString().split("T")[0],
+          ),
+          selectedTimeSlot: selectedTimeSlot,
+          // ============================================================================
         }),
       },
     });
@@ -344,7 +393,7 @@ export default function CheckoutScreen() {
           </View>
         </View>
 
-        {/* Date */}
+        {/* ==================== NEW PREFERRED SCHEDULE SECTION FOR MONTHLY SUBSCRIPTION ==================== */}
         <View
           style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}
         >
@@ -357,11 +406,11 @@ export default function CheckoutScreen() {
               marginBottom: 12,
             }}
           >
-            SERVICE DATE
+            SUBSCRIPTION START DATE
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {next14Days.map(({ key, date }) => {
-              const isSelected = selectedDate === key;
+              const isSelected = startDateKey === key;
               return (
                 <TouchableOpacity
                   key={key}
@@ -376,7 +425,7 @@ export default function CheckoutScreen() {
                     alignItems: "center",
                     minWidth: 80,
                   }}
-                  onPress={() => setSelectedDate(key)}
+                  onPress={() => setStartDateKey(key)}
                 >
                   <Text
                     style={{
@@ -401,7 +450,87 @@ export default function CheckoutScreen() {
           </ScrollView>
         </View>
 
-        {/* Time */}
+        {/* GAP TYPE SELECTION */}
+        <View
+          style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}
+        >
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: "600",
+              color: "#6B7280",
+              marginBottom: 12,
+            }}
+          >
+            SERVICE GAP
+          </Text>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            {[
+              { label: "Every 2nd Day", value: "everySecondDay" },
+              { label: "Every 3rd Day", value: "everyThirdDay" },
+            ].map((gap) => (
+              <TouchableOpacity
+                key={gap.value}
+                onPress={() => setGapType(gap.value)}
+                style={{
+                  flex: 1,
+                  padding: 14,
+                  borderRadius: 12,
+                  backgroundColor:
+                    gapType === gap.value ? "#EF4444" : "#F9FAFB",
+                  borderWidth: 1,
+                  borderColor: gapType === gap.value ? "#EF4444" : "#E5E7EB",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: gapType === gap.value ? "#FFFFFF" : "#333",
+                    fontWeight: "600",
+                  }}
+                >
+                  {gap.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* AUTO-GENERATED CALENDAR */}
+        {startDateKey && generatedDates.length > 0 && (
+          <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "600",
+                color: "#6B7280",
+                marginBottom: 8,
+              }}
+            >
+              GENERATED SERVICE DATES ({generatedDates.length} slots)
+            </Text>
+            <Calendar
+              markedDates={generatedDates.reduce((acc, date) => {
+                const dateStr = date.toISOString().split("T")[0];
+                acc[dateStr] = {
+                  selected: true,
+                  marked: true,
+                  selectedColor: "#EF4444",
+                };
+                return acc;
+              }, {})}
+              theme={{
+                selectedDayBackgroundColor: "#EF4444",
+                todayTextColor: "#EF4444",
+                arrowColor: "#EF4444",
+              }}
+              enableSwipeMonths={true}
+              disableTouchEvent={true}
+            />
+          </View>
+        )}
+
+        {/* Time Slot */}
         <View
           style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}
         >
@@ -414,44 +543,46 @@ export default function CheckoutScreen() {
               marginBottom: 12,
             }}
           >
-            SERVICE TIME
+            PREFERRED TIME SLOT
           </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-            {allTimeSlots.map((slot) => {
-              const enabled = isTimeSlotEnabled(slot, selectedDate);
-              const isSelected = selectedTime === slot;
-              return (
-                <TouchableOpacity
-                  key={slot}
-                  disabled={!enabled}
+          {/* <View style={{ flexDirection: "row", gap: 12 }}> */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[
+              { label: "Early Morning (6-9 AM)", value: "early-morning" },
+              { label: "Late Morning (10-12 AM)", value: "late-morning" },
+              { label: "Afternoon (1-3 PM)", value: "afternoon" },
+              { label: "Evening (4-6 PM)", value: "evening" },
+            ].map((slot) => (
+              <TouchableOpacity
+                key={slot.value}
+                onPress={() => setSelectedTimeSlot(slot.value)}
+                style={{
+                  flex: 1,
+                  padding: 14,
+                  marginRight: 12,
+                  borderRadius: 12,
+                  backgroundColor:
+                    selectedTimeSlot === slot.value ? "#EF4444" : "#F9FAFB",
+                  borderWidth: 1,
+                  borderColor:
+                    selectedTimeSlot === slot.value ? "#EF4444" : "#E5E7EB",
+                  alignItems: "center",
+                }}
+              >
+                <Text
                   style={{
-                    paddingHorizontal: 24,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    backgroundColor: isSelected ? "#ffefefff" : "#F9FAFB",
-                    borderWidth: 1,
-                    borderColor: isSelected ? "#EF4444" : "#E5E7EB",
-                    opacity: enabled ? 1 : 0.4,
+                    color: selectedTimeSlot === slot.value ? "#FFFFFF" : "#333",
+                    fontWeight: "600",
+                    textAlign: "center",
                   }}
-                  onPress={() => enabled && setSelectedTime(slot)}
                 >
-                  <Text
-                    style={[
-                      {
-                        fontSize: 14,
-                        color: isSelected ? "#EF4444" : "#111827",
-                      },
-                      !enabled && { color: "#9CA3AF" },
-                      isSelected && { fontWeight: "600" },
-                    ]}
-                  >
-                    {slot}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                  {slot.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
+        {/* ========================================================================================= */}
 
         {/* Address */}
         <View style={{ padding: 16 }}>
@@ -553,7 +684,6 @@ export default function CheckoutScreen() {
             APPLY COUPON
           </Text>
 
-          {/* Dropdown List of Available Coupons */}
           {availableCoupons.length > 0 && (
             <View style={{ marginBottom: 16 }}>
               <TouchableOpacity
@@ -600,7 +730,6 @@ export default function CheckoutScreen() {
                       onPress={() => {
                         setCouponCode(coupon.code);
                         setCouponDropdownOpen(false);
-                        // handleApplyCoupon();
                       }}
                     >
                       <View
@@ -630,7 +759,6 @@ export default function CheckoutScreen() {
             </View>
           )}
 
-          {/* Manual Coupon Input */}
           <View style={{ flexDirection: "row", gap: 10 }}>
             <TextInput
               style={{
@@ -667,7 +795,6 @@ export default function CheckoutScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Applied Coupon Display */}
           {selectedCoupon && (
             <View
               style={{
@@ -731,7 +858,6 @@ export default function CheckoutScreen() {
               <Text>Convenience Fee</Text>
               <Text>₹{convenienceFee}.00</Text>
             </View>
-            {/* DISCOUNT */}
             {discount > 0 && (
               <View
                 style={{
@@ -788,7 +914,7 @@ export default function CheckoutScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Address Modal */}
+      {/* Address Modal - UNCHANGED */}
       <Modal visible={addressModal} transparent animationType="slide">
         <View
           style={{
@@ -905,8 +1031,7 @@ export default function CheckoutScreen() {
         </View>
       </Modal>
 
-      {/* Add Address Modal */}
-      {/* Add Address Modal - FULLY KEYBOARD-AWARE & SCROLLABLE */}
+      {/* Add Address Modal - UNCHANGED */}
       <Modal visible={addAddressModal} transparent animationType="slide">
         <View
           style={{
@@ -921,7 +1046,7 @@ export default function CheckoutScreen() {
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
               maxHeight: "92%",
-              paddingBottom: insets.bottom + 20
+              paddingBottom: insets.bottom + 20,
               // Remove flex:1 here — let KeyboardAwareScrollView handle it
             }}
           >

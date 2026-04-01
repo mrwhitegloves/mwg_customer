@@ -64,6 +64,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="subscription"
+        options={{
+          title: 'Subscription',
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="calendar" size={icon.lg} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',

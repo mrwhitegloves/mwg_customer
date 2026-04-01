@@ -21,6 +21,7 @@ export default function PaymentScreen() {
 
   // CORRECT: bookingData is a STRING → JSON.parse it
   const data = bookingData ? JSON.parse(bookingData) : null;
+  console.log("Parsed booking data:", data);
 
   const [method, setMethod] = useState('pay after service');
   const [loading, setLoading] = useState(false);
@@ -132,8 +133,21 @@ export default function PaymentScreen() {
         vehicleId: data.vehicleId,
         paymentType: 'pay after service',
         paymentMode: 'cash',
+        isMonthlySubscription: data?.isMonthlySubscription,
+        subscriptionStartDate: data?.subscriptionStartDate || null,
+        gapType: data?.gapType || null,
+        generatedDates: data?.generatedDates || null,
+        selectedTimeSlot: data?.selectedTimeSlot || null,
       };
-      const res = await api.post('/bookings', payload);
+
+      let res;
+
+      if (data?.isMonthlySubscription === true) {
+        res = await api.post('/bookings/create-subscription', payload);
+      } else {
+        res = await api.post('/bookings', payload);
+      }
+      console.log('Booking Response in payment screen:', res.data); // Debug log
       // router.replace(`/bookingConfirmed?bookingId=${res.data.booking._id}`);
       // ────── BUILD BOOKING OBJECT ONCE ──────
     const bookingInfo = {
@@ -261,18 +275,28 @@ export default function PaymentScreen() {
         vehicleId: data.vehicleId,
         paymentType: 'pay online',
         paymentMode: 'online',
+        isMonthlySubscription: data?.isMonthlySubscription,
+        subscriptionStartDate: data?.subscriptionStartDate || null,
+        gapType: data?.gapType || null,
+        generatedDates: data?.generatedDates || null,
+        selectedTimeSlot: data?.selectedTimeSlot || null,
         onlinePaymentId: paymentId,
         onlineAmount: amount,
       };
 
+      let bookingRes;
 
-      const bookingRes = await api.post('/bookings', bookingPayload);
+      if (data?.isMonthlySubscription === true) {
+        bookingRes = await api.post('/bookings/create-subscription', bookingPayload);
+      } else {
+        bookingRes = await api.post('/bookings', bookingPayload);
+      }
       // router.replace(`/bookingConfirmed?bookingId=${bookingRes.data.booking._id}`);
       // ────── BUILD BOOKING OBJECT ONCE ──────
     const bookingInfo = {
       booking: bookingRes.data.booking,
-      paymentType: 'pay after service',
-      paymentMode: 'cash',
+      paymentType: 'pay online',
+      paymentMode: 'online',
     };
 
     // ────── SEND AS JSON STRING (ONLY ONCE!) ──────

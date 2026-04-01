@@ -96,12 +96,22 @@ export default function ServiceDetailScreen() {
       <View style={{ padding: 8 }}>
         <Text numberOfLines={1} style={{ fontSize: 13, fontWeight: '500' }}>{item.name}</Text>
         <Text style={{ fontSize: 13, color: '#FF0000', fontWeight: 'bold' }}>₹{item.basePrice}</Text>
-        <TouchableOpacity style={{ backgroundColor: '#df3737', padding: 8, borderRadius: 6, marginTop: 6, alignItems: 'center' }} onPress={() => router.push({
+
+        {item.name === 'Monthly Subscription' ? (
+          <TouchableOpacity style={{ backgroundColor: '#df3737', padding: 8, borderRadius: 6, marginTop: 6, alignItems: 'center' }} onPress={() => router.push({
+                        pathname: '/subscriptionCheckout',
+                        params: { services: JSON.stringify(item) }
+                      })}>
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 12 }}>Book Now</Text>
+        </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={{ backgroundColor: '#df3737', padding: 8, borderRadius: 6, marginTop: 6, alignItems: 'center' }} onPress={() => router.push({
                         pathname: '/checkout',
                         params: { services: JSON.stringify(item) }
                       })}>
           <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 12 }}>Book Now</Text>
         </TouchableOpacity>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -202,9 +212,28 @@ export default function ServiceDetailScreen() {
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#333' }}>
                   ₹{service.basePrice}
                 </Text>
-                <Text style={{ fontSize: 12, color: '#999' }}>Inclusive of all taxes</Text>
+                <Text style={{ fontSize: 12, color: '#999' }}>Price exclusive of taxes</Text>
               </View>
-              <TouchableOpacity
+
+              {service.name === 'Monthly Subscription' ? (
+                <TouchableOpacity
+                style={{
+                  backgroundColor: '#cc2e2e',
+                  paddingVertical: 14,
+                  paddingHorizontal: 32,
+                  borderRadius: 12,
+                  elevation: 4,
+                }}
+
+                onPress={() => router.push({
+              pathname: '/subscriptionCheckout',
+              params: { services: JSON.stringify(service) }
+            })}
+              >
+                <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>Book Now</Text>
+              </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
                 style={{
                   backgroundColor: '#cc2e2e',
                   paddingVertical: 14,
@@ -220,6 +249,7 @@ export default function ServiceDetailScreen() {
               >
                 <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>Book Now</Text>
               </TouchableOpacity>
+              )}
             </View>
 
             {/* Related Services */}

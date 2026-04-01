@@ -59,6 +59,8 @@ useEffect(() => {
 
   const { booking } = parsedData;
 
+  console.log('Parsed Booking Data in booking confirmed screen:', booking); // Debug log
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       <StatusBar barStyle="dark-content" />

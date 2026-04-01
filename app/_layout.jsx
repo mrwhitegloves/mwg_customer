@@ -1,6 +1,7 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Updates from 'expo-updates';
 import { useEffect } from 'react';
@@ -8,6 +9,7 @@ import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import { Provider } from 'react-redux';
+import { useAppSelector } from '../store/hooks';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from '../store/store';
 import SplashScreen from './(onboarding)/splash';
@@ -17,6 +19,38 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 export const unstable_settings = {
   anchor: '(tabs)',
 };
+
+function AuthGuard() {
+  const router = useRouter();
+  const token = useAppSelector((state) => state.auth.token);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        let currentToken = token;
+        if (!currentToken) {
+          currentToken = await AsyncStorage.getItem("authToken");
+        }
+        if (!token) {
+          router.replace("/login");
+        }
+      } catch (err) {
+        console.warn("Token invalid or API error:", err);
+        await AsyncStorage.removeItem("authToken");
+        router.replace("/login");
+      }
+    };
+
+    // Show splash for at least 1 seconds
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [token]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -40,6 +74,7 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <PersistGate loading={<SplashScreen />} persistor={persistor}>
+      <AuthGuard />
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <GestureHandlerRootView>
             <BottomSheetModalProvider>
@@ -54,20 +89,11 @@ export default function RootLayout() {
             <Stack.Screen name="bookingConfirmed" options={{ headerShown: false }} />
             <Stack.Screen name="payment" options={{ headerShown: false }} />
           </Stack>
-          <StatusBar style="light" />
           <Toast />
           </BottomSheetModalProvider>
           </GestureHandlerRootView>
         </ThemeProvider>
       </PersistGate>
     </Provider>
-  );
-}
-
-function LoadingScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#2ECC71" />
-    </View>
   );
 }
