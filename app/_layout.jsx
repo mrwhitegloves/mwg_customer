@@ -15,6 +15,7 @@ import { persistor, store } from '../store/store';
 import SplashScreen from './(onboarding)/splash';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import InAppUpdates, { IAUUpdateKind } from 'react-native-in-app-updates';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -57,6 +58,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     checkUpdate();
+    checkNewAppUpdate();
   }, []);
 
   const checkUpdate = async () => {
@@ -70,6 +72,21 @@ export default function RootLayout() {
       console.log('Update check failed:', e);
     }
   };
+
+  const checkNewAppUpdate = async () => {
+  try {
+    const inAppUpdates = new InAppUpdates(false); // false = not debug
+    const result = await inAppUpdates.checkNeedsUpdate();
+
+    if (result.shouldUpdate) {
+      // FLEXIBLE = background download, user can keep using app
+      // IMMEDIATE = fullscreen forced update
+      await inAppUpdates.startUpdate({ updateType: IAUUpdateKind.FLEXIBLE });
+    }
+  } catch (e) {
+    console.log('New App Update check failed:', e);
+  }
+};
 
   return (
     <Provider store={store}>
